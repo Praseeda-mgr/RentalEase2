@@ -1,0 +1,35 @@
+{% extends 'navbar_footer.html' %}
+
+{% block content %}
+  <!-- Main Content -->
+  <main class="flex-grow">
+    <div class="container mx-auto py-12">
+      <!-- Welcome Banner -->
+      <div class="bg-blue-100 rounded-lg shadow-lg p-8 text-center">
+        <h1 class="text-3xl font-bold text-blue-600">Welcome to the Admin Panel</h1>
+        <p class="mt-4 text-gray-700">Manage all aspects of your rental application effortlessly.</p>
+      </div>
+
+      <!-- Dashboard Sections -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+        <!-- Dashboard Overview Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <a href='seller_dashboard/'><h2 class="text-xl font-semibold text-blue-600">Dashboard</h2>
+          <p class="mt-2 text-gray-600">Get an overview of your application’s performance and usage.</p></a>
+        </div>
+
+        <!-- User Management Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-600">User Management</h2>
+          <p class="mt-2 text-gray-600">Manage user accounts, roles, and permissions.</p>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-600">Settings</h2>
+          <p class="mt-2 text-gray-600">Adjust preferences and customize your application’s settings.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

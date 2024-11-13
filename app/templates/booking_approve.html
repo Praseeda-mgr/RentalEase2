@@ -1,0 +1,45 @@
+{% extends 'navbar_footer.html' %}
+
+{% block content%}
+<body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center">
+
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
+        <h1 class="text-2xl font-semibold text-gray-800 text-center mb-6">Booking Approval</h1>
+
+        <!-- Booking Details Section -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded mb-6">
+            <p class="text-gray-600"><strong>Property:</strong> {{ booking.property.name }}</p>
+            <p class="text-gray-600"><strong>Client:</strong> {{ booking.client.username }}</p>
+            <p class="text-gray-600"><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+            <p class="text-gray-600"><strong>Current Status:</strong> {{ booking.approval_status }}</p>
+        </div>
+
+        <!-- Form for Approving or Rejecting the Booking -->
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <label for="status" class="block text-gray-700 font-medium">Approval Status:</label>
+            <select name="status" id="status" required
+                    class="block w-full p-3 bg-gray-50 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="approved">Approve</option>
+                <option value="rejected">Reject</option>
+            </select>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
+                Submit
+            </button>
+        </form>
+
+        <!-- Messages Section -->
+        {% if messages %}
+            <div class="mt-6">
+                <ul class="space-y-2">
+                    {% for message in messages %}
+                        <li class="text-green-600 bg-green-100 p-2 rounded">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+{% endblock %}

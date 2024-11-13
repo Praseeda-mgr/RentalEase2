@@ -1,0 +1,47 @@
+{% extends 'navbar_footer.html' %}
+
+{% block content %}
+    <div class="container mx-auto px-6 py-8">
+        <h2 class="text-2xl font-bold text-blue-700 mb-6">Your Property Bookings</h2>
+
+        {% if bookings %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left font-semibold">Property</th>
+                            <th class="py-3 px-4 text-left font-semibold">Client</th>
+                            <th class="py-3 px-4 text-left font-semibold">Booking Date</th>
+                            <th class="py-3 px-4 text-left font-semibold">Status</th>
+                            <th class="py-3 px-4 text-left font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        {% for booking in bookings %}
+                            <tr class="border-b hover:bg-gray-100">
+                                <td class="py-4 px-4">{{ booking.property.name }}</td>
+                                <td class="py-4 px-4">{{ booking.client.username }}</td>
+                                <td class="py-4 px-4">{{ booking.booking_date }}</td>
+                                <td class="py-4 px-4">
+                                    <span class="px-2 py-1 rounded-full {% if booking.approval_status == 'approved' %}bg-green-200 text-green-700{% elif booking.approval_status == 'rejected' %}bg-red-200 text-red-700{% else %}bg-yellow-200 text-yellow-700{% endif %}">
+                                        {{ booking.approval_status|title }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    {% if booking.approval_status == 'pending' %}
+                                        <a href="{% url 'approve_booking' booking.id 'approved' %}" class="text-green-600 hover:text-green-800 font-semibold mr-3">Approve</a>
+                                        <a href="{% url 'approve_booking' booking.id 'rejected' %}" class="text-red-600 hover:text-red-800 font-semibold">Reject</a>
+                                    {% else %}
+                                        <span class="text-gray-500">No actions available</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600 mt-4">No booking requests for your properties.</p>
+        {% endif %}
+    </div>
+{% endblock %}

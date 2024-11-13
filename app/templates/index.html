@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentalEase</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- Navbar -->
+<header class="bg-blue-800 text-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold">RentalEase</h1>
+        <nav class="flex space-x-4 text-lg">
+            <!-- Home Link with Conditional Redirect for Unauthenticated Users -->
+            <a 
+                href="{% if user.is_authenticated %}home/{% else %}{% url 'register' %}{% endif %}"
+                class="hover:text-blue-200">
+                Home
+            </a>
+            <a href="#about" class="hover:text-blue-200">About Us</a>
+            <a href="#services" class="hover:text-blue-200">Services</a>
+            <a href="#contact" class="hover:text-blue-200">Contact</a>
+
+            <!-- Conditional Rendering for Authentication Links -->
+            {% if user.is_authenticated %}
+                <!-- Display User Profile if Logged In -->
+                <p class="text-white hover:text-blue-300">{{user}}</p>
+            {% else %}
+                <!-- Show Login and Register Links if Not Logged In -->
+                <a href="{% url 'login' %}" class="text-white hover:text-blue-300">Login</a>
+                <a href="{% url 'register' %}" class="bg-white text-blue-600 font-semibold py-1 px-3 text-sm rounded-lg hover:bg-blue-100 transition duration-200">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+
+<!-- Hero Section -->
+<section class="bg-cover bg-center h-screen relative" style="background-image: url('https://source.unsplash.com/1600x900/?house');">
+    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4">
+        <h2 class="text-5xl md:text-6xl font-bold leading-tight mb-6 drop-shadow-lg">Welcome to RentalEase</h2>
+        <p class="text-xl md:text-2xl mb-8 leading-relaxed drop-shadow-md">Your trusted partner for seamless property rentals and management</p>
+        <a href="#about" class="mt-4 bg-blue-600 text-white py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+            Learn More
+        </a>
+    </div>
+</section>
+
+<!-- About Us Section -->
+<section id="about" class="py-20 bg-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-6">About Us</h2>
+        <p class="text-lg leading-relaxed text-gray-600">At RentalEase, we specialize in providing a comprehensive rental system that allows property owners to manage their properties and tenants effortlessly. From booking to payments and maintenance requests, our user-friendly platform streamlines all aspects of rental management, empowering both property owners and renters with the tools they need for a seamless experience.</p>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-20 bg-gradient-to-r from-gray-100 to-gray-200">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16 text-blue-800">Our Services</h2>
+        <div class="flex flex-wrap justify-center gap-8">
+
+            <!-- Service Card 1 -->
+            <div class="bg-white shadow-lg rounded-lg p-8 w-full md:w-1/3 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+                <div class="flex items-center justify-center mb-4">
+                    <img src="https://img.icons8.com/ios-filled/50/4a90e2/building.png" alt="Property Management Icon" class="w-12 h-12"/>
+                </div>
+                <h3 class="text-2xl font-semibold text-center mb-4 text-blue-700">Property Management</h3>
+                <p class="text-gray-600 text-center leading-relaxed">
+                    Manage multiple properties efficiently. Track occupancy, automate rental processes, and handle tenant management seamlessly from one centralized platform.
+                </p>
+            </div>
+
+            <!-- Service Card 2 -->
+            <div class="bg-white shadow-lg rounded-lg p-8 w-full md:w-1/3 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+                <div class="flex items-center justify-center mb-4">
+                    <img src="https://img.icons8.com/ios-filled/50/4a90e2/user-shield.png" alt="Tenant Portal Icon" class="w-12 h-12"/>
+                </div>
+                <h3 class="text-2xl font-semibold text-center mb-4 text-blue-700">Tenant Portal</h3>
+                <p class="text-gray-600 text-center leading-relaxed">
+                    Provide tenants with a secure, personalized portal to access leases, make payments, and submit maintenance requests, enhancing their rental experience.
+                </p>
+            </div>
+
+        <!-- Service Card 3 -->
+<div class="bg-white shadow-lg rounded-lg p-8 w-full md:w-1/3 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+    <div class="flex items-center justify-center mb-4">
+        <img src="https://img.icons8.com/ios-filled/50/4a90e2/money.png" alt="Booking & Payments Icon" class="w-12 h-12"/>
+    </div>
+    <h3 class="text-2xl font-semibold text-center mb-4 text-blue-700">Booking & Payments</h3>
+    <p class="text-gray-600 text-center leading-relaxed">
+        Streamline bookings and handle payments securely with ease. Our platform ensures reliability for both landlords and renters, with automated payment reminders and secure processing.
+    </p>
+</div>
+
+
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-20 bg-gradient-to-r from-blue-800 to-blue-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-8">Contact Us</h2>
+        <p class="mb-10 text-lg">Have questions or want to learn more about our rental solutions? Our team is here to help!</p>
+        
+        <form class="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <div class="mb-6">
+                <input type="text" placeholder="Your Name" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-gray-700">
+            </div>
+            <div class="mb-6">
+                <input type="email" placeholder="Your Email" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-gray-700">
+            </div>
+            <div class="mb-6">
+                <textarea placeholder="Your Message" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-gray-700" rows="5"></textarea>
+            </div>
+            <button class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg">Send Message</button>
+        </form>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-6">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 RentalEase. All rights reserved.</p>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Property</title>
+    <!-- Link to Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Delete Property</h2>
+        <p class="text-gray-600 mb-6">
+            Are you sure you want to delete the property: 
+            <span class="font-bold text-gray-900">{{ property.name }}</span>?
+            <br>This action cannot be undone.
+        </p>
+
+        <!-- Confirmation Form -->
+        <form method="POST">
+            {% csrf_token %}
+            <div class="flex justify-center space-x-4">
+                <button type="submit" class="w-32 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-150 ease-in-out">
+                    Delete
+                </button>
+                <a href="{% url 'allproperties' %}" class="w-32 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

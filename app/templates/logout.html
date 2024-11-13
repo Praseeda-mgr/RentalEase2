@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm text-center">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Are you sure you want to logout?</h2>
+        <p class="text-gray-600 mb-6">You will need to log in again to access your account.</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="flex justify-between">
+                <button type="submit" class="w-full bg-red-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200">
+                    Yes, Logout
+                </button>
+            </div>
+        </form>
+
+        <p class="text-sm text-gray-500 mt-6">
+            Changed your mind? <a href="{% url 'index' %}" class="text-blue-500 hover:underline">Go back to Home</a>
+        </p>
+    </div>
+</body>
+</html>

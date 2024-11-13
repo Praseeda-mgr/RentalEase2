@@ -1,0 +1,49 @@
+{% extends 'navbar_footer.html' %}
+
+{% block content %}
+<body class="bg-gray-100 font-sans">
+  <!-- Main Container -->
+  <div class="container mx-auto px-4 py-12">
+    <!-- Page Title -->
+    <h1 class="text-4xl font-bold text-blue-700 text-center mb-8">
+      Available Properties
+    </h1>
+
+    <!-- Property List -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% if property %}
+        {% for item in property %}
+          <div class="bg-green-500 rounded-lg shadow-md p-6 transform hover:scale-105 transition duration-300">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+            Seller  {{ item.seller }}
+            </h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+              {{ item.title }}
+            </h2>
+            <p class="text-gray-600">
+              <strong>Location:</strong> {{ item.location }}
+            </p>
+            <p class="text-gray-600"><strong>Price:</strong> ${{ item.price }}</p>
+            <p class="text-gray-600 mb-4">
+              <strong>Description:</strong> {{ item.description }}
+            </p>
+            <p class="text-gray-600 mb-4">
+              <strong>Id:</strong> {{ item.id }}
+            </p>
+            {% if item.image %}
+  <img src="{{ item.image.url }}" alt="{{ item.title }}" 
+       class="mt-4 rounded-md max-w-full max-h-72 object-contain" />
+{% endif %}
+            
+            <a href="{% url 'book_property' item.id %}" class="inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mt-4">
+              View Details
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center text-gray-500 col-span-full">No properties available at the moment.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+</body>

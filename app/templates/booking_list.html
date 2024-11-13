@@ -1,0 +1,55 @@
+{% extends 'navbar_footer.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings List</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 py-10">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Booking List</h1>
+
+    <!-- Set up a two-column grid -->
+    <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 justify-center mx-auto max-w-5xl">
+        {% if bookings %}
+            {% for booking in bookings %}
+                <div class="flex items-center bg-white shadow-md rounded-lg p-6">
+                    <!-- Booking details section -->
+                    <div class="flex-1 mr-6">
+                        <h2 class="text-xl font-semibold text-gray-700">{{ booking.property.title }}</h2> <!-- Display Title -->
+                        <h3 class="text-lg font-semibold text-gray-700">Property: {{ booking.property.name }}</h3>
+                        <p class="text-gray-600"><strong>Client:</strong> {{ booking.client.username }}</p>
+                        <p class="text-gray-600"><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+                        <p class="text-gray-600"><strong>Status:</strong> {{ booking.approval_status }}</p>
+                        <p class="text-gray-600"><strong>Booked:</strong> {{ booking.property.is_booked|yesno:"Yes,No" }}</p> <!-- Display is_booked status -->
+
+                        {% if booking.approval_status == 'pending' %}
+                            <div class="mt-4">
+                                <a href="{% url 'approve_booking' booking.id %}" class="px-4 py-2 mr-2 text-white bg-green-500 hover:bg-green-600 rounded">Approve</a>
+                                <a href="{% url 'reject_booking' booking.id %}" class="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded">Reject</a>
+                            </div>
+                        {% else %}
+                            <p class="italic text-gray-500 mt-2">This booking is {{ booking.approval_status }}.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Property image section -->
+                    {% if booking.property.image %}
+                        <img src="{{ booking.property.image.url }}" 
+                        alt="Image of {{ booking.property.name }}" 
+                        style="width: 200px; height: 200px; object-fit: cover;" 
+                        class="rounded-md">
+                    {% else %}
+                        <p class="italic text-gray-500">No image available.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-gray-600">No bookings available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
+{% endblock %}
