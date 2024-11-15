@@ -24,7 +24,6 @@
                         <p class="text-gray-600"><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
                         <p class="text-gray-600"><strong>Status:</strong> {{ booking.approval_status }}</p>
                         <p class="text-gray-600"><strong>Booked:</strong> {{ booking.property.is_booked|yesno:"Yes,No" }}</p> <!-- Display is_booked status -->
-
                         {% if booking.approval_status == 'pending' %}
                             <div class="mt-4">
                                 <a href="{% url 'approve_booking' booking.id %}" class="px-4 py-2 mr-2 text-white bg-green-500 hover:bg-green-600 rounded">Approve</a>
