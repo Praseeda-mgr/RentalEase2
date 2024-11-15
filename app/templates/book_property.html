@@ -1,4 +1,6 @@
 <!-- book_property.html -->
+ {%extends 'navbar_footer.html'%}
+ {%block content%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +27,7 @@
     {% endif %}
 
     <p class="text-gray-700 mt-4"><strong>Booking Status:</strong> {{ property.approval_status }}</p>
-    <p class="text-gray-700 mb-6"><strong>Is booked:</strong> {% if property.is_booked %}Booked{% else %}Available{% endif %}</p>
+    <p class="text-gray-700 mb-6"><strong>Is booked:</strong> {% if property.is_booked %}Booked{% else %}not booked{% endif %}</p>
 
 
     <!-- Display Messages -->
@@ -50,3 +52,4 @@
 
 </body>
 </html>
+{% endblock %}

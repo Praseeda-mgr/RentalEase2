@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from .models import Property, Booking
 from .forms import PropertyForm
-
+from django.contrib.auth.decorators import login_required
 
 def registration(request):
     error = None
@@ -37,7 +37,7 @@ def login_page(request):
         # Ensure user exists before attempting password verification
         try:
             user = User.objects.get(email=email)
-            print(user.email)
+            # print(user.email)
         except User.DoesNotExist:
             error = "User does not exist"
             return render(request, 'login.html', {'error': error})
@@ -60,7 +60,7 @@ def logout_page(request):
     if request.user.is_authenticated:
         logout(request)  
     return redirect('login')  
-
+@login_required
 def index(request):
     return render(request, 'index.html')
 
@@ -154,19 +154,22 @@ from django.contrib import messages
 from .models import Property
 
 @login_required
+
 def delete_property(request, id):
+    message=""
     # Get the property instance by ID and ensure it belongs to the current user
     property = get_object_or_404(Property, id=id, seller=request.user)
     if request.method == "POST":
         # Delete the property
         property.delete()
-        messages.success(request, 'Property deleted successfully.')
+        message="Property  deleted successfully"
         return redirect('allproperties')  # Redirect to the list of all properties
 
     context = {
-        'property': property
+        'property': property,
+        message:""
     }
-    return render(request, 'confirm_delete.html', context)
+    return render(request, 'delete_property.html', context)
 
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Property, Booking
@@ -205,43 +208,25 @@ from .models import Booking, Property
 from django.contrib import messages
 
 @login_required
-def approve_booking(request, id):
-    # Fetch the booking object, ensure it's not already booked
-    booking = get_object_or_404(Booking, id=id)
-    property = booking.property
-
-    # Check if the property is already booked
-    if property.is_booked:
-        messages.error(request, "This property is already booked.")
-        return redirect('/property')
-
-    if request.method == "POST":
-        approval_status = request.POST.get("status")
-        
-        # Check if the selected approval_status is valid
-        if approval_status in ["approved", "rejected"]:
-            booking.approval_status = approval_status
-            
-            if approval_status == "approved":
-                property.is_booked = True
-                property.save()  # Mark the property as booked
-
-            booking.save()  # Save the booking status
-            messages.success(request, f"The booking has been {approval_status} successfully.")
-            return redirect('/property')
-        else:
-            messages.error(request, "Invalid status selected.")
-
-    return render(request, 'booking_approve.html', {'booking': booking})
+def approve_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    booking.approval_status = 'approved'
+    booking.property.is_booked = True  # Mark property as booked
+    booking.property.save()
+    booking.save()
+    messages.success(request, f"Booking for {booking.property.title} has been approved.")
+    return redirect('booking_list')
 
 @login_required
+
 def reject_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, property__seller=request.user)
-    
-    # Reject the booking
+    booking = get_object_or_404(Booking, id=booking_id)
     booking.approval_status = 'rejected'
+    booking.property.is_booked = False  # Ensure property is not marked as booked
+    booking.property.save()
     booking.save()
-    return redirect('/property')  # Redirect to seller's booking list
+    messages.success(request, f"Booking for {booking.property.title} has been rejected.")
+    return redirect('booking_list')  # Redirect to seller's booking list
 
 
 @login_required
@@ -322,7 +307,7 @@ def Properties(request):
 @login_required
 def booking_list(request):
     # Fetch bookings that are not approved
-    bookings = Booking.objects.filter(approval_status__in=['pending', 'rejected'])
+    bookings = Booking.objects.filter(approval_status__in=['pending', 'rejected','approved'])
     return render(request, 'booking_list.html', {'bookings': bookings})
 
 @login_required
