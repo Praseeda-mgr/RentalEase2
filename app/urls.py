@@ -17,8 +17,9 @@ urlpatterns = [
       path('seller/bookings/', seller_bookings, name='seller_bookings'),
       path('seller/bookings/<int:booking_id>/<str:status>/', update_booking_status, name='update_booking_status'),
       path('property/<int:property_id>/book/', book_property, name='book_property'),
-      path('bookings/<int:id>/approve/', approve_booking, name='approve_booking'),
+     
         path('bookings', booking_list, name='booking_list'),
-        path('bookings/<int:id>/reject/',approve_booking,name='reject_booking'),
+         path('approve_booking/<int:booking_id>/', approve_booking, name='approve_booking'),
+    path('reject_booking/<int:booking_id>/', reject_booking, name='reject_booking'),
         path('contact', contact_view, name='contact'),
 ]
