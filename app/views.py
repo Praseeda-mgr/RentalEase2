@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
-from .models import Property, Booking
+from .models import Property, Booking,Contact
 from .forms import PropertyForm
 from django.contrib.auth.decorators import login_required
 
@@ -13,15 +13,25 @@ def registration(request):
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
+
         if User.objects.filter(username=username).exists():
             error = "Username already exists"
+        elif User.objects.filter(email=email).exists():
+            error = "Email already exists"
         else:
-            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
+            user = User.objects.create_user(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                password=password
+            )
             return redirect('login')
     context = {
         'error': error
     }
     return render(request, 'registration.html', context)
+
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
@@ -32,11 +42,23 @@ def login_page(request):
     error = None
     if request.method == 'POST':
         email = request.POST.get('email')
+        
         password = request.POST.get('password')
 
         # Ensure user exists before attempting password verification
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.filter(email=email)
+           
+            if user.count() == 1:
+                user = user.first()
+            elif user.count() > 1:
+    # Handle duplicate emails
+                error="Multiple accounts found with this email. Please contact support."
+                return redirect('login')
+            else:
+              error="No account found with this email."
+              return redirect('login')
+
             # print(user.email)
         except User.DoesNotExist:
             error = "User does not exist"
@@ -177,6 +199,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def book_property(request, property_id):
+    messages=""
     property = get_object_or_404(Property, id=property_id)
     property_image = property.image  # Get the property image
 
@@ -195,12 +218,12 @@ def book_property(request, property_id):
             property.is_booked = True
             property.save()
 
-            messages.success(request, 'Booking request submitted successfully.')
+            messages="Booking request submitted successfully"
             return redirect('allproperties')  # Redirect to a success page or another URL
         else:
-            messages.error(request, 'This property is either not approved or not available for booking.')
+            messages='This property is either not approved or not available for booking.'
 
-    return render(request, 'book_property.html', {'property': property})
+    return render(request, 'book_property.html', {'property': property,'messages':messages})
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -218,7 +241,6 @@ def approve_booking(request, booking_id):
     return redirect('booking_list')
 
 @login_required
-
 def reject_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
     booking.approval_status = 'rejected'
@@ -274,27 +296,28 @@ def update_booking_status(request, booking_id, status):
 @login_required
 def book_property(request, property_id):
     # Ensure the property exists and is available
+    messages=""
     property = get_object_or_404(Property, id=property_id, is_available=True)
 
     if request.method == 'POST':
         # Check if the user already has a pending or confirmed booking for this property
         if Booking.objects.filter(property=property, client=request.user, approval_status__in=['pending', 'confirmed']).exists():
-            messages.warning(request, "You already have an existing booking for this property.")
+            messages="You already have an existing booking for this property."
             return redirect('allproperties')
 
         # Check if the property has any confirmed bookings by other users
         if Booking.objects.filter(property=property, approval_status='confirmed').exists():
-            messages.warning(request, "This property is already fully booked.")
+            messages="This property is already fully booked."
             return redirect('allproperties')
 
         # Create a new booking request
         booking = Booking(property=property, client=request.user, approval_status='pending')
         booking.save()
 
-        messages.success(request, "Your booking request has been submitted successfully!")
+        messages="Your booking request has been submitted successfully!"
         return redirect('allproperties')
 
-    return render(request, 'book_property.html', {'property': property})
+    return render(request, 'book_property.html', {'property': property,'messages':messages})
 
 @login_required
 def Properties(request):
@@ -312,17 +335,29 @@ def booking_list(request):
 
 @login_required
 def contact_view(request):
+    messages=""
     if request.method == 'POST':
         name = request.POST.get('name')
+        
         phone_number = request.POST.get('phone_number')
+       
         location = request.POST.get('location')
+        
         email = request.POST.get('email')
+        
+
 
         # Simple validation checks
         if not name or not phone_number or not location or not email:
-            messages.error(request, "All fields are required.")
+            messages= "All fields are required."
         else:
             # Here you could save the data to the database or send an email, etc.
-            return redirect('allproperties')
+              Contact.objects.create(
+                name=name,
+                phone_number=phone_number,
+                location=location,
+                email=email
+            )
+              return redirect('allproperties')
 
-    return render(request, 'contact.html')
+    return render(request, 'contact.html',{'messages':messages})
