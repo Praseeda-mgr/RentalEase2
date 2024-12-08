@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex h-screen bg-gray-100">
+
+    <!-- Sidebar -->
+    <div class="min-h-screen  bg-gray-800 text-white flex flex-col p-5">
+        <h2 class="text-2xl font-semibold text-center mb-10">Admin Panel</h2>
+        {% if request.user.is_superuser %}
+       
+            <a href="{% url "home"%}" class="text-lg py-3 px-4 hover:bg-gray-700 rounded-md">Home</a>
+          
+        <a href="manageproperty" class="text-lg py-3 px-4 hover:bg-gray-700 rounded-md">Dashboard</a>
+        <a href="users" class="text-lg py-3 px-4 hover:bg-gray-700 rounded-md">Users</a>
+        <a href="adminpanel" class="text-lg py-3 px-4 hover:bg-gray-700 rounded-md">Messages</a>
+        {% else %}
+        <a href="logout/" class="text-lg py-3 px-4 hover:bg-gray-700 rounded-md">Log Out</a>
+        <div class="text-sm mt-4">Logged in as: <span class="font-bold">{{ request.user }}</span></div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 bg-white p-10">
+
+        <!-- Table Section -->
+        <div class="mt-10 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-6">Messages</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto border-collapse border border-gray-300 rounded-lg">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-lg font-semibold">Title</th>
+                            <th class="px-4 py-2 text-left text-lg font-semibold">Seller</th>
+                            <th class="px-4 py-2 text-left text-lg font-semibold">Image</th>
+                            <th class="px-4 py-2 text-left text-lg font-semibold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in property %}
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="px-4 py-2">{{ msg.title }}</td>
+                            <td class="px-4 py-2">{{ msg.seller }}</td>
+                            <td class="px-4 py-2">
+                                {% if msg.image %}
+                                <img src="{{ msg.image.url }}" alt="{{ msg.title }}" 
+                                     class="rounded-md w-32 h-20 object-cover">
+                                {% else %}
+                                <span class="text-gray-500 italic">No image</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2">
+                                <a href="{% url 'update_property' msg.id %}" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">Edit</a>
+                                <a href="{% url 'delete_property' msg.id %}" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 ml-2">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-gray-500">No messages available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

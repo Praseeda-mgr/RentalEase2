@@ -16,7 +16,7 @@
         <nav class="flex space-x-4 text-lg">
             <!-- Home Link with Conditional Redirect for Unauthenticated Users -->
             <a 
-                href="{% if user.is_authenticated %}home/{% else %}{% url 'register' %}{% endif %}"
+                href="home/"
                 class="hover:text-blue-200">
                 Property
             </a>

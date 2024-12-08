@@ -4,21 +4,38 @@ from django.contrib.auth import login, logout
 from .models import Property, Booking,Contact
 from .forms import PropertyForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 
 def registration(request):
-    error = None
-    if request.method == "POST":
-        username = request.POST.get('username')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+    if not request.user.is_authenticated:
 
-        if User.objects.filter(username=username).exists():
-            error = "Username already exists"
-        elif User.objects.filter(email=email).exists():
-            error = "Email already exists"
-        else:
+        if request.method == "POST":
+            username = request.POST.get('username')
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+
+            # Validation checks
+            if not username or not first_name or not last_name or not email or not password:
+                messages.error(request, 'Please fill in all the required fields')
+                return redirect('register')
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists. Please choose a different one')
+                return redirect('register')
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "Email already exists")
+                return redirect('register')
+
+            # Create the user
             user = User.objects.create_user(
                 username=username,
                 first_name=first_name,
@@ -26,11 +43,24 @@ def registration(request):
                 email=email,
                 password=password
             )
-            return redirect('login')
-    context = {
-        'error': error
-    }
-    return render(request, 'registration.html', context)
+
+            # Authenticate and log the user in
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                print("Authentication successful.")
+                login(request, user)
+                messages.success(request, 'Registration successful. You are now logged in.')
+                return redirect('home')
+            else:
+                print("Authentication failed.")
+                messages.error(request, 'Authentication failed. Please try again.')
+                return redirect('register')
+
+
+        return render(request, 'registration.html')
+    else:
+        return redirect('home')
+
 
 
 from django.shortcuts import render, redirect
@@ -61,8 +91,8 @@ def login_page(request):
 
             # print(user.email)
         except User.DoesNotExist:
-            error = "User does not exist"
-            return render(request, 'login.html', {'error': error})
+            messages.error(request,"User does not exist") 
+            return render(request, 'login.html')
 
         # Verify the password manually
         if check_password(password, user.password):
@@ -82,16 +112,40 @@ def logout_page(request):
     if request.user.is_authenticated:
         logout(request)  
     return redirect('login')  
-@login_required
+
 def index(request):
     return render(request, 'index.html')
 
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-@login_required
+
 def home_page(request):  
-    return render(request, 'home.html')
+    property=Property.objects.all()
+    search=request.GET.get('search')
+    if search:
+        property=property.filter(title__icontains=search)
+    
+    from_ = request.GET.get('from')
+    to_ = request.GET.get('to')
+    location = request.GET.get('location')
+    
+    if from_ and to_:
+        property = property.filter(price__gte=from_, price__lt=to_)
+    elif from_:
+        property = property.filter(price__gte=from_)
+    elif to_:
+        property = property.filter(price__lt=to_)
+    if location:
+        property = property.filter(location__icontains=location)
+    paginator = Paginator(property, 4)  # Show 4 properties per page
+    page_number = request.GET.get('page')  # Get the page number from URL
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
+    context={
+        'property':property,
+        'page_obj':page_obj
+    }
+    return render(request,'home.html',context)
 
 
 from django.contrib.auth.decorators import login_required
@@ -101,7 +155,7 @@ def seller_dashboard(request):
     # Check if the user is authenticated
     if request.user.is_authenticated:
         seller_id = request.user.id
-        properties = Property.objects.all()
+        properties = Property.objects.filter(seller=request.user)
         # Define context with all necessary data
         context = {
             'seller_id': seller_id,
@@ -129,7 +183,7 @@ def add_property(request):
             is_available = request.POST.get('is_available')
             property.is_available = True if is_available == "on" else False
             property.save()
-            return redirect('allproperties')  # Redirect to avoid resubmission on page refresh
+            return redirect('home')  # Redirect to avoid resubmission on page refresh
     else:
         form = PropertyForm()
     return render(request, 'add_property.html', {'form': form})
@@ -219,7 +273,7 @@ def book_property(request, property_id):
             property.save()
 
             messages="Booking request submitted successfully"
-            return redirect('allproperties')  # Redirect to a success page or another URL
+            return redirect('home')  # Redirect to a success page or another URL
         else:
             messages='This property is either not approved or not available for booking.'
 
@@ -230,25 +284,57 @@ from django.contrib.auth.decorators import login_required
 from .models import Booking, Property
 from django.contrib import messages
 
+from django.contrib import messages
+
 @login_required
 def approve_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
+
+    if booking.property.seller != request.user:
+        messages.error(
+            request,
+            f"You cannot approve the booking for {booking.property.title}.",
+            extra_tags=f"property-{booking_id}"  # Custom tag for identifying this message
+        )
+        return redirect('bookings_list')
+
+    # Approve booking
     booking.approval_status = 'approved'
-    booking.property.is_booked = True  # Mark property as booked
+    booking.property.is_booked = True
     booking.property.save()
     booking.save()
-    messages.success(request, f"Booking for {booking.property.title} has been approved.")
-    return redirect('booking_list')
+
+    messages.success(
+        request,
+        f"Booking for {booking.property.title} has been approved.",
+        extra_tags=f"property -{booking_id}"  # Custom tag for identifying this message
+    )
+    return redirect('bookings_list')
+
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from .models import Booking
 
 @login_required
 def reject_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
+
+    # Check if the current user is the seller of the property
+    if booking.property.seller != request.user:
+        messages.error(request, "You are not authorized to reject this booking.", extra_tags=f"property-{booking_id}")
+        return redirect('bookings_list')
+
+    # Reject booking and update the property status
     booking.approval_status = 'rejected'
     booking.property.is_booked = False  # Ensure property is not marked as booked
     booking.property.save()
     booking.save()
-    messages.success(request, f"Booking for {booking.property.title} has been rejected.")
-    return redirect('booking_list')  # Redirect to seller's booking list
+
+    # Add success message
+    messages.success(request, f"Booking for {booking.property.title} has been rejected.", extra_tags=f"booking-{booking_id}")
+    
+    # Redirect to the booking list
+    return redirect('bookings_list')
 
 
 @login_required
@@ -319,19 +405,52 @@ def book_property(request, property_id):
 
     return render(request, 'book_property.html', {'property': property,'messages':messages})
 
-@login_required
+
 def Properties(request):
     property=Property.objects.filter(is_booked=False)
+    paginator = Paginator(property, 4)  # Show 4 properties per page
+    page_number = request.GET.get('page')  # Get the page number from URL
+    page_obj = paginator.get_page(page_number)  # Get the corresponding page object
     context={
-        'property':property
+        'property':property,
+        'page_obj':page_obj
     }
     return render(request,'Property.html',context)
 
 @login_required
-def booking_list(request):
-    # Fetch bookings that are not approved
-    bookings = Booking.objects.filter(approval_status__in=['pending', 'rejected','approved'])
-    return render(request, 'booking_list.html', {'bookings': bookings})
+def bookings_list(request):
+    bookings = Booking.objects.all()
+
+    # Handle approval and rejection
+    action = request.GET.get('action')
+    booking_id = request.GET.get('booking_id')
+
+    if action and booking_id:
+        booking = get_object_or_404(Booking, id=booking_id)
+
+        if booking.property.seller != request.user:
+            messages.error(request, "You are not authorized to perform this action.")
+            return redirect('bookings_list')
+
+        if action == 'approve':
+            booking.approval_status = 'approved'
+            booking.property.is_booked = True
+            booking.property.save()
+            booking.save()
+            messages.success(request, f"Booking for {booking.property.title} has been approved.")
+        elif action == 'reject':
+            booking.approval_status = 'rejected'
+            booking.property.is_booked = False
+            booking.property.save()
+            booking.save()
+            messages.success(request, f"Booking for {booking.property.title} has been rejected.")
+
+        return redirect('bookings_list')
+
+    context = {'bookings': bookings}
+    return render(request, 'booking_list.html', context)
+
+  
 
 @login_required
 def contact_view(request):
@@ -361,3 +480,29 @@ def contact_view(request):
               return redirect('allproperties')
 
     return render(request, 'contact.html',{'messages':messages})
+@login_required
+def admin_panel(request):
+    if request.user.is_superuser:
+        property=Property.objects.all()
+        messages=Contact.objects.all()
+    else:
+        property=Property.objects.filter(seller=request.user)  
+        messages=[]
+    context={
+        'property':property,
+        'messages':messages
+    }  
+    return render(request, 'adminPanel.html',context)
+
+def manageproperty(request):
+    property=Property.objects.all()
+    return render(request,'manageProperty.html',{'property':property})
+
+def users(request):
+    # Retrieve all properties
+    properties = Property.objects.all()
+    
+    # Get distinct sellers who are associated with properties
+    sellers = set(property.seller for property in properties if property.seller.is_authenticated)
+    
+    return render(request, 'seller.html', {'sellers': sellers})
