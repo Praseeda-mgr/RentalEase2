@@ -415,7 +415,7 @@ def Properties(request):
         'property':property,
         'page_obj':page_obj
     }
-    return render(request,'Property.html',context)
+    return render(request,'property.html',context)
 
 @login_required
 def bookings_list(request):
