@@ -291,14 +291,14 @@ from django.contrib import messages
 from django.contrib import messages
 
 @login_required
-def approve_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+def approve_booking(request, slug):
+    booking = get_object_or_404(Booking, slug=slug)
 
     if booking.property.seller != request.user:
         messages.error(
             request,
             f"You cannot approve the booking for {booking.property.title}.",
-            extra_tags=f"property-{booking_id}"  # Custom tag for identifying this message
+            extra_tags=f"property-{slug}"  # Custom tag for identifying this message
         )
         return redirect('bookings_list')
 
@@ -311,7 +311,7 @@ def approve_booking(request, booking_id):
     messages.success(
         request,
         f"Booking for {booking.property.title} has been approved.",
-        extra_tags=f"property -{booking_id}"  # Custom tag for identifying this message
+        extra_tags=f"property -{slug}"  # Custom tag for identifying this message
     )
     return redirect('bookings_list')
 
@@ -320,12 +320,12 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import Booking
 
 @login_required
-def reject_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+def reject_booking(request, slug):
+    booking = get_object_or_404(Booking, slug=slug)
 
     # Check if the current user is the seller of the property
     if booking.property.seller != request.user:
-        messages.error(request, "You are not authorized to reject this booking.", extra_tags=f"property-{booking_id}")
+        messages.error(request, "You are not authorized to reject this booking.", extra_tags=f"property-{slug}")
         return redirect('bookings_list')
 
     # Reject booking and update the property status
@@ -335,7 +335,7 @@ def reject_booking(request, booking_id):
     booking.save()
 
     # Add success message
-    messages.success(request, f"Booking for {booking.property.title} has been rejected.", extra_tags=f"booking-{booking_id}")
+    messages.success(request, f"Booking for {booking.property.title} has been rejected.", extra_tags=f"booking-{slug}")
     
     # Redirect to the booking list
     return redirect('bookings_list')
