@@ -79,7 +79,7 @@ def login_page(request):
         try:
             user = User.objects.filter(email=email)
            
-            if user.count() == 1:
+            if user.count() == 1:   
                 user = user.first()
             elif user.count() > 1:
     # Handle duplicate emails
@@ -195,9 +195,9 @@ from .models import Property
 
 
 @login_required
-def update_property(request, id):
+def update_property(request, slug):
     # Get the property instance by ID
-    property = Property.objects.get(id=id)
+    property = Property.objects.get(slug=slug)
 
     if request.method == "POST":
         # Bind form with POST data and instance to update
@@ -220,7 +220,8 @@ def update_property(request, id):
         form = PropertyForm(instance=property)
     
     context = {
-        'form': form
+        'form': form,
+        'property':property
     }
     return render(request, 'update_property.html', context)
 
@@ -231,10 +232,10 @@ from .models import Property
 
 @login_required
 
-def delete_property(request, id):
+def delete_property(request, slug):
     message=""
     # Get the property instance by ID and ensure it belongs to the current user
-    property = get_object_or_404(Property, id=id, seller=request.user)
+    property = get_object_or_404(Property, slug=slug, seller=request.user)
     if request.method == "POST":
         # Delete the property
         property.delete()
@@ -252,19 +253,22 @@ from .models import Property, Booking
 from django.contrib.auth.decorators import login_required
 
 @login_required
-def book_property(request, property_id):
-    messages=""
-    property = get_object_or_404(Property, id=property_id)
-    property_image = property.image  # Get the property image
+def book_property(request, property_slug):
+    
+    property = get_object_or_404(Property,slug=property_slug)
+    # booking = Booking.objects.get(id=1)
+    # print(booking.property.slug)  # Outputs the slug of the associated property
+
+    
 
     if request.method == 'POST':
         # Check if the property is approved and available
-        if property.approval_status == 'approved' and property.is_available:
+        if property.approval_status != 'rejected' and property.is_available and request.user!= property.seller:
             # Example booking creation logic
             booking = Booking.objects.create(
                 property=property,
-                user=request.user,
-                status='pending'
+                client=request.user,
+                approval_status='pending'
             )
             
             # Set the property as unavailable and booked
@@ -272,12 +276,12 @@ def book_property(request, property_id):
             property.is_booked = True
             property.save()
 
-            messages="Booking request submitted successfully"
+            messages.success(request, "Booking request submitted successfully.")
             return redirect('home')  # Redirect to a success page or another URL
         else:
-            messages='This property is either not approved or not available for booking.'
+            messages.error(request,'THis is your property and you cannot book this property')
 
-    return render(request, 'book_property.html', {'property': property,'messages':messages})
+    return render(request, 'book_property.html', {'property': property})
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -338,8 +342,8 @@ def reject_booking(request, booking_id):
 
 
 @login_required
-def property_detail(request, property_id):
-    property = get_object_or_404(Property, id=property_id)
+def property_detail(request, slug):
+    property = get_object_or_404(Property,slug=slug)
     booking = None
 
     # Check if the user has a booking for this property
@@ -379,31 +383,38 @@ def update_booking_status(request, booking_id, status):
         booking.save()
     return redirect('seller_bookings')
 
-@login_required
-def book_property(request, property_id):
-    # Ensure the property exists and is available
-    messages=""
-    property = get_object_or_404(Property, id=property_id, is_available=True)
+# @login_required
+# def book_property(request, property_slug):
+#     # Ensure the property exists and is available
+#     messages=""
+#     property = get_object_or_404(Property, slug=property_slug, is_available=True)
+#     booking = Booking.objects.filter(property=property).first()
+#     if booking:
+#         print(booking.property.slug)
+#     else:
+#         print("No booking found for this property.")
 
-    if request.method == 'POST':
-        # Check if the user already has a pending or confirmed booking for this property
-        if Booking.objects.filter(property=property, client=request.user, approval_status__in=['pending', 'confirmed']).exists():
-            messages="You already have an existing booking for this property."
-            return redirect('allproperties')
+    
 
-        # Check if the property has any confirmed bookings by other users
-        if Booking.objects.filter(property=property, approval_status='confirmed').exists():
-            messages="This property is already fully booked."
-            return redirect('allproperties')
+#     if request.method == 'POST':
+#         # Check if the user already has a pending or confirmed booking for this property
+#         if Booking.objects.filter(property=property, client=request.user, approval_status__in=['pending', 'confirmed']).exists():
+#             messages="You already have an existing booking for this property."
+#             return redirect('allproperties')
 
-        # Create a new booking request
-        booking = Booking(property=property, client=request.user, approval_status='pending')
-        booking.save()
+#         # Check if the property has any confirmed bookings by other users
+#         if Booking.objects.filter(property=property, approval_status='confirmed').exists():
+#             messages="This property is already fully booked."
+#             return redirect('allproperties')
 
-        messages="Your booking request has been submitted successfully!"
-        return redirect('allproperties')
+#         # Create a new booking request
+#         booking = Booking(property=property, client=request.user, approval_status='pending')
+#         booking.save()
 
-    return render(request, 'book_property.html', {'property': property,'messages':messages})
+#         messages="Your booking request has been submitted successfully!"
+#         return redirect('allproperties')
+
+#     return render(request, 'book_property.html', {'property': property,'messages':messages})
 
 
 def Properties(request):
@@ -419,14 +430,15 @@ def Properties(request):
 
 @login_required
 def bookings_list(request):
-    bookings = Booking.objects.all()
+    
+    bookings = Booking.objects.filter(property__is_booked=False,approval_status='pending')
 
     # Handle approval and rejection
     action = request.GET.get('action')
     booking_id = request.GET.get('booking_id')
 
     if action and booking_id:
-        booking = get_object_or_404(Booking, id=booking_id)
+        booking = get_object_or_404(Booking, id=booking_id,approval_status='pending')
 
         if booking.property.seller != request.user:
             messages.error(request, "You are not authorized to perform this action.")
@@ -441,6 +453,7 @@ def bookings_list(request):
         elif action == 'reject':
             booking.approval_status = 'rejected'
             booking.property.is_booked = False
+            booking.property.approval_status='rejected'
             booking.property.save()
             booking.save()
             messages.success(request, f"Booking for {booking.property.title} has been rejected.")
@@ -506,3 +519,6 @@ def users(request):
     sellers = set(property.seller for property in properties if property.seller.is_authenticated)
     
     return render(request, 'seller.html', {'sellers': sellers})
+
+def images(request):
+    return render(request,'images.html')

@@ -1,11 +1,16 @@
 {%extends 'navbar_footer.html' %}
 
 {%block content %}
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen items-center">
     <div class="max-w-md w-full bg-white rounded-lg shadow-md p-6">
         <!-- Property Title -->
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ property.name }}</h1>
-
+        <img
+        src="{{ property.image.url }}"
+        alt="{{ property.title }}"
+        class="mt-4 rounded-md max-w-full max-h-30 object-contain"
+      />
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ property.seller}}</h1>
+        <p class="text-gray-600 mb-4">{{ property.title }}</p>
         <!-- Property Description -->
         <p class="text-gray-600 mb-4">{{ property.description }}</p>
 
@@ -13,7 +18,7 @@
         <div class="mb-4">
             <p class="text-gray-700"><strong>Price:</strong> {{ property.price }}</p>
             <p class="text-gray-700"><strong>Location:</strong> {{ property.location }}</p>
-            <p class="text-gray-700"><strong>Property ID:</strong> {{ property.id }}</p>
+           
             <p class="text-gray-700"><strong>Status:</strong> {{ property.status|title }}</p>
         </div>
 

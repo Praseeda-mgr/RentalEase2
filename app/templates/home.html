@@ -1,89 +1,127 @@
-{% extends 'navbar_footer.html' %}
-
-{% block content %}
+{% extends 'navbar_footer.html' %} {% block content %}
 
 <!-- Main Content -->
 <body class="bg-[#D3D0CBFF] font-sans">
-  <div class="bg-[#2E5266FF]"><div class="text-white text-3xl tracking-wide font-semibold   mx-[200px]">"Find your perfect space with ease—Rent, Sell, and Book effortlessly with Rental Ease."
-  </div>
-        <!-- Search bar and button -->
-        <form method="search">
-        <div
-          class="container mx-auto mt-4 flex justify-center items-center space-x-2 bg-[#2E5266FF] p-[100px]"
+  <div class="bg-[#2E5266FF]">
+    <div class="text-white text-3xl tracking-wide font-semibold mx-[200px]">
+      "Find your perfect space with ease—Rent, Sell, and Book effortlessly with
+      Rental Ease."
+    </div>
+    <!-- {% load static %}
+    <img src="{% static 'images/cat.jpeg' %}" alt="My image" /> -->
+    <!-- Search bar and button -->
+    <form method="search">
+      <div
+        class="container mx-auto mt-4 flex justify-center items-center space-x-2 bg-[#2E5266FF] p-[100px]"
+      >
+        <input
+          type="text"
+          placeholder="Search..."
+          name="search"
+          class="px-4 py-2 rounded-lg border bg-[#2E5266FF] border-white w-3/4 sm:w-1/2 md:w-1/3"
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
         >
-          <input
-            type="text"
-            placeholder="Search..."name="search"
-            class="px-4 py-2 rounded-lg border bg-[#2E5266FF] border-white w-3/4 sm:w-1/2 md:w-1/3 "
-          />
-          <button type="submit"
-            class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 "
-          >
-            Search
-          </button>
-        </div></form></div>
+          Search
+        </button>
+      </div>
+    </form>
+  </div>
   <!-- Main Container -->
-  <div class="container mx-auto px-4 py-12 ">
+  <div class="container mx-auto px-4 py-12">
     <h1 class="text-4xl">Rents</h1>
     <div class="container w-full h-auto mb-3 p-[50px]">
-      <form id="filterForm" action="/" class="flex sm:flex-row flex-col justify-center gap-3 items-center" method="get">
-          <div class="flex gap-1 flex-col items-center">
-              <label for="startdate" class="font-bold">From</label>
-              <input type="Number" id="from" placeholder="price" class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300" name="from" value="{{ request.GET.from }}">
-          </div>
-          <div class="flex gap-1 flex-col items-center">
-              <label for="enddate" class="font-bold">To</label>
-              <input type="number" id="enddate"placeholder="price" class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300" name="to" value="{{ request.GET.to }}">
-          </div>
-          <div class="flex gap-1 flex-col items-center">
-              <label for="searchUser" class="font-bold">Search location</label>
-              <input type="text" id="searchUser" placeholder="Search Location" class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300" name="location" value="{{ request.GET.locations }}">
-          </div>
-          <button class="bg-pink-500 mt-4 p-2 pl-5 rounded-lg hover:bg-indigo-700 text-white">Filter Rentals</button>
+      <form
+        id="filterForm"
+        action="/"
+        class="flex sm:flex-row flex-col justify-center gap-3 items-center"
+        method="get"
+      >
+        <div class="flex gap-1 flex-col items-center">
+          <label for="startdate" class="font-bold">From</label>
+          <input
+            type="Number"
+            id="from"
+            placeholder="price"
+            class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300"
+            name="from"
+            value="{{ request.GET.from }}"
+          />
+        </div>
+        <div class="flex gap-1 flex-col items-center">
+          <label for="enddate" class="font-bold">To</label>
+          <input
+            type="number"
+            id="enddate"
+            placeholder="price"
+            class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300"
+            name="to"
+            value="{{ request.GET.to }}"
+          />
+        </div>
+        <div class="flex gap-1 flex-col items-center">
+          <label for="searchUser" class="font-bold">Search location</label>
+          <input
+            type="text"
+            id="searchUser"
+            placeholder="Search Location"
+            class="p-2 px-5 bg-gray-200 border-1 rounded-xl border-gray-300"
+            name="location"
+            value="{{ request.GET.locations }}"
+          />
+        </div>
+        <button
+          class="bg-pink-500 mt-4 p-2 pl-5 rounded-lg hover:bg-indigo-700 text-white"
+        >
+          Filter Rentals
+        </button>
       </form>
-  </div>
+    </div>
 
     <!-- Page Title -->
-   
 
     <!-- Property List -->
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {% if page_obj.object_list %}
-        {% for item in page_obj.object_list %}
-          <!-- Property Card -->
-          <div class="bg-white rounded-lg shadow-md p-6 transform hover:scale-105 transition duration-300">
-            {% if item.image %}
-            <img src="{{ item.image.url }}" alt="{{ item.title }}" 
-                 class="mt-4 rounded-md max-w-full max-h-30 object-contain">
-          {% endif %}
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-              Seller: {{ item.seller }}
-            </h2>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-              Title: {{ item.title }}
-            </h2>
-            <p class="text-gray-600 mb-1">
-              <strong>Location:</strong> {{ item.location }}
-            </p>
-            <p class="text-gray-600 mb-1">
-              <strong>Price:</strong> Rs:{{ item.price }}
-            </p>
-            <p class="text-gray-600 mb-3">
-              <strong>ID:</strong> {{ item.id }}
-            </p>
-           
-
-            <!-- Action Button -->
-            <a href="{% url 'book_property' item.id %}" 
-               class="inline-block bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mt-4">
-              View Details
-            </a>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p class="text-center text-gray-500 col-span-full">
-          No properties available at the moment.
+      {% if page_obj.object_list %} {% for item in page_obj.object_list %}
+      <!-- Property Card -->
+      <div
+        class="bg-white rounded-lg shadow-md p-6 transform hover:scale-105 transition duration-300"
+      >
+        {% if item.image %}
+        <img
+          src="{{ item.image.url }}"
+          alt="{{ item.title }}"
+          class="mt-4 rounded-md max-w-full max-h-30 object-contain"
+        />
+        {% endif %}
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+          Seller: {{ item.seller }}
+        </h2>
+        <p 
+          >Title:{{ item.title }}</p
+        >
+        <p class="text-gray-600 mb-1">
+          <strong>Location:</strong> {{ item.location }}
         </p>
+        <p class="text-gray-600 mb-1">
+          <strong>Price:</strong> Rs:{{ item.price }}
+        </p>
+        
+
+        <!-- Action Button -->
+        <a
+          href="{% url 'book_property' item.slug %}"
+          class="inline-block bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mt-4"
+        >
+          View Details
+        </a>
+      </div>
+      {% endfor %} {% else %}
+      <p class="text-center text-gray-500 col-span-full">
+        No properties available at the moment.
+      </p>
       {% endif %}
     </div>
 
@@ -91,13 +129,30 @@
     <div class="flex justify-center mt-8">
       <div class="flex items-center space-x-4">
         {% if page_obj.has_previous %}
-          <a href="?page=1" class="text-blue-600 hover:text-blue-700">First</a>
-          <a href="?page={{ page_obj.previous_page_number }}" class="text-blue-600 hover:text-blue-700">Previous</a>
+        <a href="?page=1" class="text-blue-600 hover:text-blue-700">First</a>
+        <a
+          href="?page={{ page_obj.previous_page_number }}"
+          class="text-blue-600 hover:text-blue-700"
+          >Previous</a
+        >
         {% endif %}
-        <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+       <span class="text-gray-700">
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+</span>
+
+
+
         {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="text-blue-600 hover:text-blue-700">Next</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}" class="text-blue-600 hover:text-blue-700">Last</a>
+        <a
+          href="?page={{ page_obj.next_page_number }}"
+          class="text-blue-600 hover:text-blue-700"
+          >Next</a
+        >
+        <a
+          href="?page={{ page_obj.paginator.num_pages }}"
+          class="text-blue-600 hover:text-blue-700"
+          >Last</a
+        >
         {% endif %}
       </div>
     </div>
